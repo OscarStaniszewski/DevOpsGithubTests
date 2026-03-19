@@ -34,6 +34,13 @@ jobs:
           name: pytest-report
           path: reports/pytest-report.xml
 
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+
 
   lint:
     runs-on: ubuntu-latest
