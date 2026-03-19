@@ -1,5 +1,5 @@
 from app import add, app
-import os
+import
 
 
 def test_add():
