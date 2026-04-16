@@ -1,0 +1,35 @@
+name: Simulated release
+
+on:
+  push_request:
+
+jobs:
+  package-image:
+    if: ${{ github.ref == 'refs/heads/master' }}'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Build docker image
+      run: docker build -t gha-gr2-release:${{ github.sha }} .
+
+    - name: Save docker image
+      run: docker save gha-gr2-release:${{ github.sha }} > image.tar
+
+    - name: Compress docker image
+      run: gzip image.tar
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image-${{ github.sha }}
+        path: image.tar.gz
+
+    - name: Add entry in GITHUB_STEP_SUMMARY
+      run: |
+        echo "Actor: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "SHA: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "Artifact: docker-image-${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "This is a simulated release" >> $GITHUB_STEP_SUMMARY
