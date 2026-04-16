@@ -1,4 +1,4 @@
-name: zadanie 1
+name: Compose smoke check
 
 on:
   pull_request:
