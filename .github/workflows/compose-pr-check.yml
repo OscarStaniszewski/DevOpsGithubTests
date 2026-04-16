@@ -1,0 +1,41 @@
+name: zadanie 1
+
+on:
+  pull_request:
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker compose build
+        run: docker compose up -d --build
+
+      - name: Wait for app to start
+        run: |
+          sleep 10
+          curl --fail http://127.0.0.1:8000/health
+
+      - name: Save logs
+        if: always()
+        run: docker compose logs > compose.log
+
+      - name: Upload compose.log as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-logs
+          path: compose.log
+
+      - name: Add entry in GITHUB_STEP_SUMMARY
+        if: always()
+        run: |
+          echo "Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Ref: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "Status: ${{ job.status == 'success' && 'pass' || 'fail' }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Stop Compose
+        if: always()
+        run: docker compose down
